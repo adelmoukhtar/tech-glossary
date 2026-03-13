@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tech Glossary</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;600&family=Cairo:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0a0a0f;
+    color: #e8e8f0;
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    padding: 60px 24px;
+    background-image:
+      radial-gradient(ellipse 60% 50% at 10% 0%, rgba(123,95,255,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 90% 100%, rgba(0,245,196,0.08) 0%, transparent 60%);
+  }
+
+  /* TRANSLATE BUTTON */
+  .translate-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 100px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(17,17,24,0.9);
+    backdrop-filter: blur(12px);
+    color: #e8e8f0;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+
+  .translate-btn:hover { border-color: #7b5fff; color: #7b5fff; box-shadow: 0 0 20px rgba(123,95,255,0.3); }
+  .translate-btn.ar-active { border-color: #00f5c4; color: #00f5c4; box-shadow: 0 0 20px rgba(0,245,196,0.25); }
+
+  .translate-btn .flag { font-size: 16px; }
+
+  header { text-align: center; margin-bottom: 48px; padding-top: 20px; }
+
+  header h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(56px, 10vw, 100px);
+    letter-spacing: 0.08em;
+    line-height: 1;
+    background: linear-gradient(135deg, #fff 30%, #00f5c4 70%, #7b5fff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  header p {
+    color: #6b6b82;
+    font-size: 14px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-top: 8px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 48px;
+  }
+
+  .filter-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 9px 22px;
+    border-radius: 100px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: transparent;
+    color: #6b6b82;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .filter-btn:hover { border-color: rgba(255,255,255,0.25); color: #e8e8f0; }
+  .filter-btn.active { color: #e8e8f0; border-color: rgba(255,255,255,0.25); background: rgba(255,255,255,0.06); }
+  .filter-btn[data-filter="ai"].active        { border-color: #00f5c4; color: #00f5c4; background: rgba(0,245,196,0.08); }
+  .filter-btn[data-filter="engineering"].active { border-color: #38bdf8; color: #38bdf8; background: rgba(56,189,248,0.08); }
+  .filter-btn[data-filter="business"].active  { border-color: #ffd166; color: #ffd166; background: rgba(255,209,102,0.08); }
+  .filter-btn[data-filter="sales"].active     { border-color: #ff4f7b; color: #ff4f7b; background: rgba(255,79,123,0.08); }
+  .filter-btn[data-filter="marketing"].active { border-color: #f97316; color: #f97316; background: rgba(249,115,22,0.08); }
+
+  .count {
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: #6b6b82;
+    margin-bottom: 32px;
+    letter-spacing: 0.08em;
+  }
+  .count span { color: #e8e8f0; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 20px;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  .card {
+    background: #111118;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 16px;
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .card.hidden { display: none; }
+  .card:hover { transform: translateY(-4px); border-color: var(--c); box-shadow: 0 0 40px -10px var(--c); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card:nth-child(1)  { --c: #00f5c4; } .card:nth-child(2)  { --c: #7b5fff; }
+  .card:nth-child(3)  { --c: #ff4f7b; } .card:nth-child(4)  { --c: #ffd166; }
+  .card:nth-child(5)  { --c: #06b6d4; } .card:nth-child(6)  { --c: #f97316; }
+  .card:nth-child(7)  { --c: #a3e635; } .card:nth-child(8)  { --c: #e879f9; }
+  .card:nth-child(9)  { --c: #38bdf8; } .card:nth-child(10) { --c: #fb923c; }
+  .card:nth-child(11) { --c: #4ade80; } .card:nth-child(12) { --c: #f43f5e; }
+  .card:nth-child(13) { --c: #818cf8; } .card:nth-child(14) { --c: #facc15; }
+  .card:nth-child(15) { --c: #34d399; } .card:nth-child(16) { --c: #c084fc; }
+  .card:nth-child(17) { --c: #f472b6; } .card:nth-child(18) { --c: #94a3b8; }
+  .card:nth-child(19) { --c: #ff6b6b; }
+  .card:nth-child(20) { --c: #fbbf24; }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--c);
+    border-radius: 16px 16px 0 0;
+  }
+
+  .card::after {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--c), transparent 70%);
+    opacity: 0.08;
+    pointer-events: none;
+  }
+
+  .tag {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--c);
+    background: color-mix(in srgb, var(--c) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--c) 30%, transparent);
+    padding: 3px 10px;
+    border-radius: 100px;
+    margin-bottom: 16px;
+  }
+
+  .abbr {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 0.04em;
+    color: var(--c);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .full-name {
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    color: #6b6b82;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .definition {
+    font-size: 14px;
+    line-height: 1.75;
+    color: #b0b0c8;
+    font-weight: 300;
+    transition: opacity 0.2s ease;
+  }
+
+  .icon {
+    position: absolute;
+    bottom: 24px;
+    right: 24px;
+    font-size: 36px;
+    opacity: 0.12;
+  }
+
+  .example {
+    margin-top: 14px;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.03);
+    border-left: 2px solid var(--c);
+    border-radius: 0 8px 8px 0;
+    font-size: 12px;
+    color: #6b6b82;
+    font-family: 'DM Mono', monospace;
+    line-height: 1.6;
+    transition: opacity 0.2s ease;
+  }
+
+  .example strong { color: var(--c); font-weight: 500; }
+
+  /* Arabic mode */
+  body.arabic .definition,
+  body.arabic .example {
+    font-family: 'Cairo', sans-serif;
+    direction: rtl;
+    text-align: right;
+    font-size: 13px;
+  }
+
+  body.arabic .example {
+    border-left: none;
+    border-right: 2px solid var(--c);
+    border-radius: 8px 0 0 8px;
+  }
+
+  .lang-en { display: block; }
+  .lang-ar { display: none; }
+
+  body.arabic .lang-en { display: none; }
+  body.arabic .lang-ar { display: block; }
+</style>
+</head>
+<body>
+
+<!-- TRANSLATE BUTTON -->
+<button class="translate-btn" id="translateBtn" onclick="toggleLang()">
+  <span class="flag">🇸🇦</span>
+  <span id="btnLabel">العربية</span>
+</button>
+
+<header>
+  <h1>Tech Glossary</h1>
+  <p>The more beginner you are, the more this helps 🚀</p>
+</header>
+
+<div class="filters" id="filters">
+  <button class="filter-btn active" data-filter="all">All</button>
+</div>
+
+<p class="count">Showing <span id="count">19</span> of 19 terms</p>
+
+<div class="grid">
+
+  <!-- RAG -->
+  <div class="card" data-category="ai">
+    <div class="tag">AI / LLM</div>
+    <div class="abbr">RAG</div>
+    <div class="full-name">Retrieval-Augmented Generation</div>
+    <div class="definition">
+      <span class="lang-en">A technique that supercharges AI by letting it search a knowledge base before answering. Instead of relying only on training data, the model retrieves fresh relevant documents and uses them to generate more accurate responses.</span>
+      <span class="lang-ar">تقنية تُعزز قدرات الذكاء الاصطناعي بالسماح له بالبحث في قاعدة معرفية قبل الإجابة. بدلاً من الاعتماد على بيانات التدريب فقط، يسترجع النموذج مستندات حديثة ذات صلة ليولّد إجابات أكثر دقة.</span>
+    </div>
+    <div class="example">
+      <span class="lang-en"><strong>Example:</strong> A support bot queries your internal docs in real-time, then answers based on your actual product manuals — not guesses.</span>
+      <span class="lang-ar"><strong>مثال:</strong> بوت دعم العملاء يبحث في وثائقك الداخلية لحظياً ثم يجيب بناءً على أدلة المنتج الفعلية — وليس تخمينات.</span>
+    </div>
+    <span class="icon">🧠</span>
+  </div>
+
+  <!-- ROI -->
+  <div class="card" data-category="business">
+    <div class="tag">Business / Finance</div>
+    <div class="abbr">ROI</div>
+    <div class="full-name">Return on Investment</div>
+    <div class="definition">
+      <span class="lang-en">A metric that measures how much value you get back relative to what you put in. Formula: <strong>(Gain − Cost) ÷ Cost × 100</strong>. Positive ROI = paid off. Negative ROI = loss.</span>
+      <span class="lang-ar">مقياس يحدد مقدار ما تحصل عليه مقارنةً بما أنفقته. المعادلة: <strong>(الربح − التكلفة) ÷ التكلفة × 100</strong>. ROI إيجابي = ربح. ROI سلبي = خسارة.</span>
+    </div>
+    <div class="example">
+      <span class="lang-en"><strong>Example:</strong> Spent $10,000 on ads → earned $30,000 in revenue → ROI = 200%.</span>
+      <span class="lang-ar"><strong>مثال:</strong> أنفقت $10,000 على إعلانات ← حققت $30,000 إيرادات ← ROI = 200%.</span>
+    </div>
+    <span class="icon">📈</span>
+  </div>
+
+  <!-- CRM -->
+  <div class="card" data-category="sales">
+    <div class="tag">Sales / Software</div>
+    <div class="abbr">CRM</div>
+    <div class="full-name">Customer Relationship Management</div>
+    <div class="definition">
+      <span class="lang-en">A system for managing all interactions with current and potential customers. Centralizes contacts, tracks deals, logs conversations, and ensures no lead falls through the cracks.</span>
+      <span class="lang-ar">نظام لإدارة جميع تفاعلاتك مع العملاء الحاليين والمحتملين. يجمع جهات الاتصال، يتتبع الصفقات، يسجّل المحادثات، ويضمن عدم ضياع أي فرصة.</span>
+    </div>
+    <div class="example">
+      <span class="lang-en"><strong>Example:</strong> Airtable, HubSpot, Salesforce — log every touchpoint from first contact to closed deal.</span>
+      <span class="lang-ar"><strong>مثال:</strong> Airtable، HubSpot، Salesforce — تسجّل كل لحظة تواصل من أول رسالة حتى إغلاق الصفقة.</span>
+    </div>
+    <span class="icon">🤝</span>
+  </div>
+
+  <!-- PWA -->
+  <div class="card" data-category="engineering">
+    <div class="tag">Web / Mobile</div>
+    <div class="abbr">PWA</div>
+    <div class="full-name">Progressive Web App</div>
+    <div class="definition">
+      <span class="lang-en">A website that behaves like a native mobile app — installable on your home screen, works offline, and sends push notifications. Built with standard web tech but feels like a real app with no App Store needed.</span>
+      <span class="lang-ar">موقع ويب يتصرف كتطبيق جوال حقيقي — يمكن تثبيته على الشاشة الرئيسية، يعمل بدون إنترنت، ويرسل إشعارات. مبني بتقنيات الويب العادية لكنه يُحسّ كتطبيق أصلي بدون متجر تطبيقات.</span>
+    </div>
+    <div class="example">
+      <span class="lang-en"><strong>Example:</strong> Twitter Lite, Starbucks, Pinterest — all installed directly from the browser.</span>
+      <span class="lang-ar"><strong>مثال:</strong> Twitter Lite، Starbucks، Pinterest — كلها تُثبَّت مباشرة من المتصفح.</span>
+    </div>
+    <span class="icon">📱</span>
+  </div>
+
+  <!-- VectorDB -->
+  <div class="card" data-category="ai">
+    <div class="tag">AI / Databases</div>
+    <div class="abbr">VectorDB</div>
+    <div class="full-name">Vector Database</div>
+    <div class="definition">
+      <span class="lang-en">A database that stores and searches by meaning, not keywords. It converts text, images, or audio into numbers and finds results based on semantic similarity — how close the meaning is, not exact word matches.</span>
+      <span class="lang-ar">قاعدة بيانات تخزّن وتبحث بالمعنى لا بالكلمات. تحوّل النصوص والصور والصوت إلى أرقام وتجد النتائج بناءً على التشابه الدلالي — مدى قرب المعنى لا تطابق الكلمات.</span>
+    </div>
+    <div class="example">
+      <span class="lang-en"><strong>Example:</strong> Pinecone, Weaviate, Qdrant — the backbone of most RAG systems.</span>
+      <span class="lang-ar"><strong>مثال:</strong> Pinecone، Weaviate، Qdrant — العمود الفقري لمعظم أنظمة RAG.</span>
+    </div>
+    <span class="icon">🗄️</span>
+  </div>
+
+  <!-- Funnel -->
+  <div class="card" data-category="marketing">
+    <div class="tag">Marketing / Sales</div>
+    <div class="abbr">Funnel</div>
+    <div class="full-name">Sales / Marketing Funnel</div>
+    <div class="definition">
+      <span class="lang-en">A model of the customer journey from first hearing about you to buying. It narrows at each stage: <strong>Awareness → Interest → Consideration → Purchase → Loyalty</strong>. Many people enter, few convert at the bottom.</span>
+      <span class="lang-ar">نموذج يصف رحلة العميل من أول مرة يسمع فيها عنك حتى الشراء. يضيق في كل مرحلة: <strong>وعي ← اهتمام ← تفكير ← شراء ← ولاء</strong>. كثيرون يدخلون، قليلون يتحولون.</span>
+    </div>
+    <div class="example">
+      <span class="lang-en"><strong>Example:</strong> 10,000 see an ad → 1,000 sign up → 100 buy → 20 become loyal customers.</span>
+      <span class="lang-ar"><strong>مثال:</strong> 10,000 يشاهدون إعلاناً ← 1,000 يسجلون ← 100 يشترون ← 20 يصبحون عملاء دائمين.</span>
+    </div>
+    <span class="icon">🔻</span>
+  </div>
+
+  <!-- Pipeline -->
+  <div class="card" data-category="engineering">
+    <div class="tag">Engineering / Sales</div>
+    <div class="abbr">Pipeline</div>
+    <div class="full-name">Data / Sales Pipeline</div>
+    <div class="definition">
+      <span class="lang-en">A structured sequence of stages that data or deals flow through. In sales it tracks deals. In AI/data it's the automated chain that moves, cleans, and delivers data from source to destination.</span>
+      <span class="lang-ar">سلسلة منظمة من المراحل التي تمر بها البيانات أو الصفقات. في المبيعات تتبع الصفقات. في الذكاء الاصطناعي هي السلسلة الآلية التي تنقل البيانات وتنظّفها وتوصّلها من المصدر للوجهة.</span>
+    </div>
+    <div class="example">
+      <span class="lang-en"><strong>Sales:</strong> Lead → Qualified → Proposal → Closed.<br><strong>Data:</strong> Ingest → Clean → Transform → Serve.</span>
+      <span class="lang-ar"><strong>مبيعات:</strong> عميل محتمل ← مؤهّل ← عرض ← مُغلق.<br><strong>بيانات:</strong> استيعاب ← تنظيف ← تحويل ← تقديم.</span>
+    </div>
+    <span class="icon">⚙️</span>
+  </div>
+
+  <!-- LLM -->
+  <div class="card" data-category="ai">
+    <div class="tag">AI / Core</div>
+    <div class="abbr">LLM</div>
+    <div class="full-name">Large Language Model</div>
+    <div class="definition">
+      <span class="lang-en">The AI brain behind ChatGPT, Claude, and Gemini. Trained on massive text data, it predicts the most likely next word — so well it can write, reason, code, and converse. It's stateless: it remembers nothing between sessions on its own.</span>
+      <span class="lang-ar">العقل الذكي وراء ChatGPT وClaude وGemini. مُدرَّب على كميات هائلة من النصوص، يتنبأ بالكلمة التالية الأكثر احتمالاً — بدقة تجعله يكتب ويُفكّر ويُبرمج ويتحدث. لكنه لا يتذكر شيئاً بين الجلسات من تلقاء نفسه.</span>
+    </div>
+    <div class="example">
+      <span class="lang-en"><strong>Example:</strong> GPT-4, Claude, Gemini, Llama — all LLMs running under the hood of AI products.</span>
+      <span class="lang-ar"><strong>مثال:</strong> GPT-4، Claude، Gemini، Llama — كلها نماذج LLM تعمل تحت غطاء منتجات الذكاء الاصطناعي.</span>
+    </div>
+    <span class="icon">🤖</span>
+  </div>
+
+  <!-- Context Window -->
+  <div class="card" data-category="ai">
+    <div class="tag">AI / LLM</div>
+    <div class="abbr">Context Window</div>
+    <div class="full-name">The LLM's Working Memory</div>
+    <div class="definition">
+      <span class="lang-en">The maximum amount of text an LLM can read and consider at one time. Your instructions, documents, and chat history all must fit inside it. Once full, older info gets dropped. Bigger window = more the AI can hold in mind at once.</span>
+      <span class="lang-ar">الحد الأقصى من النصوص الذي يستطيع الذكاء الاصطناعي قراءته ومعالجته في آنٍ واحد. تعليماتك ومستنداتك وتاريخ المحادثة — كلها يجب أن تسع فيه. كلما كبُر، كلما احتفظ الذكاء الاصطناعي بمعلومات أكثر في "ذاكرته".</span>
+    </div>
+    <div class="example">
+      <span class="lang-en"><strong>Example:</strong> Claude has up to 1M tokens (~700,000 words) of context. GPT-4 has ~128k tokens.</span>
+      <span class="lang-ar"><strong>مثال:</strong> Claude يدعم حتى مليون رمز (~700,000 كلمة). GPT-4 يدعم ~128 ألف رمز.</span>
+    </div>
+    <span class="icon">🪟</span>
+  </div>
+
+  <!-- System Prompt -->
+  <div class="card" data-category="ai">
+    <div class="tag">AI / Prompting</div>
+    <div class="abbr">System Prompt</div>
+    <div class="full-name">Hidden AI Instructions</div>
+    <div class="definition">
+      <span class="lang-en">Secret instructions given to an AI before the conversation starts. Sets personality, rules, tone, and limits. The user never sees it — but it shapes every single response the AI gives throughout the session.</span>
+      <span class="lang-ar">تعليمات سرية تُعطى للذكاء الاصطناعي قبل بدء المحادثة. تحدد الشخصية والقواعد والنبرة والحدود. المستخدم لا يراها أبداً — لكنها تُشكّل كل إجابة يقدمها الذكاء الاصطناعي طوال الجلسة.</span>
+    </div>
+    <div class="example">
+      <span class="lang-en"><strong>Example:</strong> "You are a helpful sales assistant. Never discuss competitors. Always reply in Arabic." — that's a system prompt.</span>
+      <span class="lang-ar"><strong>مثال:</strong> "أنت مساعد مبيعات مفيد. لا تتحدث عن المنافسين أبداً. أجب دائماً بالعربية." — هذا هو System Prompt.</span>
+    </div>
+    <span class="icon">🔧</span>
+  </div>
+
+  <!-- Tokens -->
+  <div class="card" data-category="ai">
+    <div class="tag">AI / Core</div>
+    <div class="abbr">Tokens</div>
+    <div class="full-name">The Currency of LLMs</div>
+    <div class="definition">
+      <span class="lang-en">The tiny chunks an LLM reads and writes — not exactly words, more like word-pieces. Every model has a token limit per request and API pricing is based on tokens consumed. More tokens = higher cost and more context used.</span>
+      <span class="lang-ar">القطع الصغيرة التي يقرأها ويكتبها الذكاء الاصطناعي — ليست كلمات بالضبط، بل أجزاء من كلمات. كل نموذج له حد من الرموز لكل طلب والتسعير يعتمد عليها. رموز أكثر = تكلفة أعلى وسياق أكبر.</span>
+    </div>
+    <div class="example">
+      <span class="lang-en"><strong>Example:</strong> 1,000 tokens ≈ 750 words. A long document could be 50,000+ tokens.</span>
+      <span class="lang-ar"><strong>مثال:</strong> 1,000 رمز ≈ 750 كلمة. وثيقة طويلة قد تتجاوز 50,000 رمز.</span>
+    </div>
+    <span class="icon">🪙</span>
+  </div>
+
+  <!-- MCP -->
+  <div class="card" data-category="ai">
+    <div class="tag">AI / Agents</div>
+    <div class="abbr">MCP</div>
+    <div class="full-name">Model Context Protocol</div>
+    <div class="definition">
+      <span class="lang-en">A standard way for AI agents to connect to external tools and data sources — like a universal plug for AI. Instead of custom-coding every integration, MCP lets agents discover what resources are available and query them on the fly.</span>
+      <span class="lang-ar">طريقة موحّدة لتوصيل وكلاء الذكاء الاصطناعي بالأدوات الخارجية ومصادر البيانات — كقابس شامل للذكاء الاصطناعي. بدلاً من برمجة كل تكامل يدوياً، يتيح MCP للوكلاء اكتشاف الموارد المتاحة والاستعلام عنها فورياً.</span>
+    </div>
+    <div class="example">
+      <span class="lang-en"><strong>Example:</strong> An AI agent uses MCP to connect to Google Drive, your CRM, and a database — all through one standard interface.</span>
+      <span class="lang-ar"><strong>مثال:</strong> وكيل ذكاء اصطناعي يستخدم MCP للاتصال بـ Google Drive وCRM وقاعدة البيانات — كلها عبر واجهة موحّدة واحدة.</span>
+    </div>
+    <span class="icon">🔌</span>
+  </div>
+
+  <!-- Compaction -->
+  <div class="card" data-category="ai">
+    <div class="tag">AI / Optimization</div>
+    <div class="abbr">Compaction</div>
+    <div class="full-name">Context Compression</div>
+    <div class="definition">
+      <span class="lang-en">Shrinking large pieces of content into short summaries before passing them to an AI — to save space in the context window. Use one LLM call to summarize, then pass the compact version to the next step instead of the full raw document.</span>
+      <span class="lang-ar">تقليص المحتوى الكبير إلى ملخصات قصيرة قبل إرساله للذكاء الاصطناعي — لتوفير مساحة في نافذة السياق. استخدم طلباً واحداً للتلخيص ثم مرّر النسخة المضغوطة للخطوة التالية بدلاً من المستند الكامل.</span>
+    </div>
+    <div class="example">
+      <span class="lang-en"><strong>Example:</strong> A 50,000-token report → summarized into 500 words → passed to the next agent step cleanly.</span>
+      <span class="lang-ar"><strong>مثال:</strong> تقرير من 50,000 رمز ← يُلخَّص في 500 كلمة ← يُمرَّر للخطوة التالية بنظافة تامة.</span>
+    </div>
+    <span class="icon">🗜️</span>
+  </div>
+
+  <!-- Agent -->
+  <div class="card" data-category="ai">
+    <div class="tag">AI / Automation</div>
+    <div class="abbr">Agent</div>
+    <div class="full-name">Agentic AI / AI Agent</div>
+    <div class="definition">
+      <span class="lang-en">An AI that doesn't just answer questions — it takes actions. It can call tools, search databases, send messages, make decisions, and loop through tasks on its own until a goal is complete. Think AI employee, not just a chatbot.</span>
+      <span class="lang-ar">ذكاء اصطناعي لا يكتفي بالإجابة — بل يتصرّف. يستطيع استدعاء الأدوات، البحث في قواعد البيانات، إرسال الرسائل، اتخاذ القرارات، وإنجاز المهام تلقائياً حتى يكتمل الهدف. فكّر فيه كموظف ذكاء اصطناعي لا مجرد شات بوت.</span>
+    </div>
+    <div class="example">
+      <span class="lang-en"><strong>Example:</strong> Your Instagram DM bot — reads messages, checks CRM, uploads to Drive, posts to Instagram. That's an agent.</span>
+      <span class="lang-ar"><strong>مثال:</strong> بوت DM الخاص بك على إنستغرام — يقرأ الرسائل، يتحقق من CRM، يرفع الصور لـ Drive، وينشر على إنستغرام. هذا هو الـ Agent.</span>
+    </div>
+    <span class="icon">🦾</span>
+  </div>
+
+  <!-- Cron -->
+  <div class="card" data-category="engineering">
+    <div class="tag">Automation / Dev</div>
+    <div class="abbr">Cron</div>
+    <div class="full-name">Cron Job / Scheduled Task</div>
+    <div class="definition">
+      <span class="lang-en">A time-based scheduler that automatically triggers a task at a set time — every hour, every Monday, every month — with zero human input. Like setting an alarm, but instead of waking you up, it runs a workflow automatically.</span>
+      <span class="lang-ar">مُجدوِل زمني يُشغّل مهمة تلقائياً في وقت محدد — كل ساعة، كل إثنين، كل شهر — دون أي تدخل بشري. كأنك تضبط منبهاً، لكن بدلاً من إيقاظك، يُشغّل سير عمل كامل.</span>
+    </div>
+    <div class="example">
+      <span class="lang-en"><strong>Example:</strong> Every Monday at 9am → DM all active sellers to check if items are still available. That's a Cron job in n8n.</span>
+      <span class="lang-ar"><strong>مثال:</strong> كل إثنين الساعة 9 صباحاً ← راسل جميع البائعين النشطين للتأكد من توفر المنتجات. هذا هو Cron Job في n8n.</span>
+    </div>
+    <span class="icon">⏰</span>
+  </div>
+
+  <!-- SaaS -->
+  <div class="card" data-category="business">
+    <div class="tag">Business / Software</div>
+    <div class="abbr">SaaS</div>
+    <div class="full-name">Software as a Service</div>
+    <div class="definition">
+      <span class="lang-en">Software you access through a browser and pay for monthly — no installation, no downloads, no IT setup. The company hosts everything. You just log in from anywhere. Most tools in the modern AI automation stack are SaaS products.</span>
+      <span class="lang-ar">برنامج تصل إليه عبر المتصفح وتدفع له شهرياً — بدون تثبيت أو تحميل أو إعداد تقني. الشركة تستضيف كل شيء. أنت فقط تسجّل الدخول من أي مكان. معظم أدوات الأتمتة بالذكاء الاصطناعي هي منتجات SaaS.</span>
+    </div>
+    <div class="example">
+      <span class="lang-en"><strong>Example:</strong> Notion, Airtable, Canva, Gmail, n8n Cloud — all SaaS. You connect them, you don't host them.</span>
+      <span class="lang-ar"><strong>مثال:</strong> Notion، Airtable، Canva، Gmail، n8n Cloud — كلها SaaS. أنت تربطها ببعض، لا تستضيفها.</span>
+    </div>
+    <span class="icon">☁️</span>
+  </div>
+
+  <!-- RSS -->
+  <div class="card" data-category="engineering">
+    <div class="tag">Web / Automation</div>
+    <div class="abbr">RSS</div>
+    <div class="full-name">Really Simple Syndication</div>
+    <div class="definition">
+      <span class="lang-en">A way for websites to automatically push their latest content to anyone subscribed — without the reader needing to visit the site. When a site publishes something new, RSS delivers it straight to your feed reader automatically.</span>
+      <span class="lang-ar">طريقة تتيح للمواقع إرسال أحدث محتواها تلقائياً لكل مشترك — دون الحاجة لزيارة الموقع. عندما ينشر الموقع شيئاً جديداً، يصلك عبر RSS فوراً في تطبيق القراءة.</span>
+    </div>
+    <div class="example">
+      <span class="lang-en"><strong>Example:</strong> In n8n, RSS triggers a workflow the moment a blog posts something new — summarize it, post to Instagram, save to Notion. All automatic.</span>
+      <span class="lang-ar"><strong>مثال:</strong> في n8n، يُشغّل RSS سير العمل فور نشر مقالة جديدة — لخّصها، انشرها على إنستغرام، احفظها في Notion. كل شيء تلقائي.</span>
+    </div>
+    <span class="icon">📡</span>
+  </div>
+
+  <!-- CLI -->
+  <div class="card" data-category="dev">
+    <div class="tag">Dev / Tools</div>
+    <div class="abbr">CLI</div>
+    <div class="full-name">Command Line Interface</div>
+    <div class="definition">
+      <span class="lang-en">Instead of clicking buttons in an app, you type text commands directly into a terminal to control your computer or a tool. Looks intimidating at first but it's faster and more powerful than most visual interfaces once you know the commands.</span>
+      <span class="lang-ar">بدلاً من الضغط على أزرار في تطبيق، تكتب أوامر نصية مباشرة في الطرفية للتحكم بجهازك أو أداة ما. تبدو مخيفة في البداية لكنها أسرع وأقوى من معظم الواجهات المرئية حين تتقن الأوامر.</span>
+    </div>
+    <div class="example">
+      <span class="lang-en"><strong>Example:</strong> Instead of clicking through menus to install something, you type <strong>npm install n8n</strong> and it's done. Every time you run a command in Railway's terminal — that's CLI.</span>
+      <span class="lang-ar"><strong>مثال:</strong> بدلاً من النقر عبر القوائم للتثبيت، تكتب <strong>npm install n8n</strong> وينتهي الأمر. كل مرة تُشغّل أمراً في طرفية Railway — هذا هو CLI.</span>
+    </div>
+    <span class="icon">⌨️</span>
+  </div>
+
+  <!-- Hallucination -->
+  <div class="card" data-category="ai">
+    <div class="tag">AI / Risks</div>
+    <div class="abbr">Hallucination</div>
+    <div class="full-name">AI Confabulation / False Output</div>
+    <div class="definition">
+      <span class="lang-en">When an AI confidently states something that is completely made up — wrong facts, fake links, invented names — presented as if it were true. It's not lying on purpose; it's a flaw in how LLMs predict text. The more confident it sounds, the more dangerous it can be.</span>
+      <span class="lang-ar">عندما يُصرّح الذكاء الاصطناعي بثقة بشيء مخترع كلياً — حقائق خاطئة، روابط وهمية، أسماء ملفّقة — ويقدّمها كأنها صحيحة. ليس كذباً مقصوداً؛ بل عيب في طريقة توقّع النصوص. كلما بدا أكثر ثقة، كان أكثر خطورة.</span>
+    </div>
+    <div class="example">
+      <span class="lang-en"><strong>Example:</strong> You ask an AI to cite sources — it invents a convincing-looking academic paper that doesn't exist. Always verify AI outputs for critical tasks.</span>
+      <span class="lang-ar"><strong>مثال:</strong> تطلب من الذكاء الاصطناعي مصادر — فيخترع ورقة بحثية تبدو مقنعة لكنها غير موجودة. تحقّق دائماً من مخرجات الذكاء الاصطناعي في المهام المهمة.</span>
+    </div>
+    <span class="icon">👻</span>
+  </div>
+
+  <!-- CRO -->
+  <div class="card" data-category="marketing">
+    <div class="tag">Marketing / Growth</div>
+    <div class="abbr">CRO</div>
+    <div class="full-name">Conversion Rate Optimization</div>
+    <div class="definition">
+      <span class="lang-en">The practice of increasing the percentage of visitors who take a desired action — buy, sign up, click — without increasing traffic. Instead of getting more people in, you make more of the existing people convert. Formula: <strong>(Conversions ÷ Visitors) × 100</strong>.</span>
+      <span class="lang-ar">ممارسة تهدف إلى زيادة نسبة الزوار الذين يتخذون إجراءً مطلوباً — شراء، تسجيل، نقر — دون زيادة حركة المرور. بدلاً من جلب المزيد، تجعل الموجودين يتحولون. المعادلة: <strong>(التحويلات ÷ الزوار) × 100</strong>.</span>
+    </div>
+    <div class="example">
+      <span class="lang-en"><strong>Example:</strong> 1,000 visit your page → 30 buy = 3% CRO. You tweak the headline and button → 60 buy = 6% CRO. Same traffic, double the revenue.</span>
+      <span class="lang-ar"><strong>مثال:</strong> 1,000 يزورون صفحتك ← 30 يشترون = 3% CRO. تُعدّل العنوان والزر ← 60 يشترون = 6% CRO. نفس الزوار، ضعف الإيرادات.</span>
+    </div>
+    <span class="icon">🎯</span>
+  </div>
+
+</div>
+
+<script>
+  const cards = document.querySelectorAll('.card');
+  const countEl = document.getElementById('count');
+  const filtersEl = document.getElementById('filters');
+
+  // Category config: key → { emoji, label }
+  const categoryMeta = {
+    ai:          { emoji: '🤖', label: 'AI' },
+    engineering: { emoji: '⚙️', label: 'Engineering' },
+    business:    { emoji: '💼', label: 'Business' },
+    sales:       { emoji: '🤝', label: 'Sales' },
+    marketing:   { emoji: '📣', label: 'Marketing' },
+    dev:         { emoji: '💻', label: 'Dev' },
+  };
+
+  // Auto-detect all categories present in cards
+  const foundCategories = [...new Set([...cards].map(c => c.dataset.category).filter(Boolean))];
+
+  // Build filter buttons dynamically
+  foundCategories.forEach(cat => {
+    const meta = categoryMeta[cat] || { emoji: '🏷️', label: cat.charAt(0).toUpperCase() + cat.slice(1) };
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn';
+    btn.dataset.filter = cat;
+    btn.textContent = `${meta.emoji} ${meta.label}`;
+    filtersEl.appendChild(btn);
+  });
+
+  // Update total count
+  const total = cards.length;
+  countEl.textContent = total;
+  document.querySelector('.count').innerHTML = `Showing <span id="count">${total}</span> of ${total} terms`;
+
+  // Filter logic
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const filter = btn.dataset.filter;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      let visible = 0;
+      cards.forEach(card => {
+        const match = filter === 'all' || card.dataset.category === filter;
+        card.classList.toggle('hidden', !match);
+        if (match) visible++;
+      });
+      document.getElementById('count').textContent = visible;
+    });
+  });
+
+  // Translation toggle
+  let isArabic = false;
+  function toggleLang() {
+    isArabic = !isArabic;
+    const btn = document.getElementById('translateBtn');
+    const label = document.getElementById('btnLabel');
+    if (isArabic) {
+      document.body.classList.add('arabic');
+      btn.classList.add('ar-active');
+      label.textContent = 'English';
+      btn.querySelector('.flag').textContent = '🇬🇧';
+    } else {
+      document.body.classList.remove('arabic');
+      btn.classList.remove('ar-active');
+      label.textContent = 'العربية';
+      btn.querySelector('.flag').textContent = '🇸🇦';
+    }
+  }
+</script>
+
+</body>
+</html>
