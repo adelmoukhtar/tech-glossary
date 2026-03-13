@@ -216,6 +216,12 @@
     right: 24px;
     font-size: 36px;
     opacity: 0.12;
+    transition: all 0.2s ease;
+  }
+
+  body.arabic .icon {
+    right: auto;
+    left: 24px;
   }
 
   .example {
@@ -239,13 +245,30 @@
     font-family: 'Cairo', sans-serif;
     direction: rtl;
     text-align: right;
-    font-size: 13px;
+    font-size: 14px;
+    unicode-bidi: plaintext;
   }
 
   body.arabic .example {
     border-left: none;
     border-right: 2px solid var(--c);
     border-radius: 8px 0 0 8px;
+    /* Force numbers and mixed content to display correctly in RTL */
+    unicode-bidi: embed;
+  }
+
+  /* Keep numbers and latin chars (like %, $, →) readable in RTL */
+  body.arabic .example span,
+  body.arabic .definition span {
+    display: block;
+    direction: rtl;
+    text-align: right;
+  }
+
+  /* Fix: strong tags inside Arabic keep their color but flow RTL */
+  body.arabic strong {
+    unicode-bidi: embed;
+    direction: rtl;
   }
 
   .lang-en { display: block; }
@@ -303,7 +326,7 @@
     </div>
     <div class="example">
       <span class="lang-en"><strong>Example:</strong> Spent $10,000 on ads → earned $30,000 in revenue → ROI = 200%.</span>
-      <span class="lang-ar"><strong>مثال:</strong> أنفقت $10,000 على إعلانات ← حققت $30,000 إيرادات ← ROI = 200%.</span>
+      <span class="lang-ar"><strong>مثال:</strong> أنفقت 10,000 دولار على إعلانات، وحققت 30,000 دولار إيرادات. النتيجة: عائد استثمار 200٪.</span>
     </div>
     <span class="icon">📈</span>
   </div>
@@ -367,7 +390,7 @@
     </div>
     <div class="example">
       <span class="lang-en"><strong>Example:</strong> 10,000 see an ad → 1,000 sign up → 100 buy → 20 become loyal customers.</span>
-      <span class="lang-ar"><strong>مثال:</strong> 10,000 يشاهدون إعلاناً ← 1,000 يسجلون ← 100 يشترون ← 20 يصبحون عملاء دائمين.</span>
+      <span class="lang-ar"><strong>مثال:</strong> 10,000 يشاهدون إعلاناً، منهم 1,000 يسجلون، ثم 100 يشترون، وأخيراً 20 يصبحون عملاء دائمين.</span>
     </div>
     <span class="icon">🔻</span>
   </div>
@@ -383,7 +406,7 @@
     </div>
     <div class="example">
       <span class="lang-en"><strong>Sales:</strong> Lead → Qualified → Proposal → Closed.<br><strong>Data:</strong> Ingest → Clean → Transform → Serve.</span>
-      <span class="lang-ar"><strong>مبيعات:</strong> عميل محتمل ← مؤهّل ← عرض ← مُغلق.<br><strong>بيانات:</strong> استيعاب ← تنظيف ← تحويل ← تقديم.</span>
+      <span class="lang-ar"><strong>مبيعات:</strong> عميل محتمل، ثم مؤهّل، ثم عرض، ثم إغلاق.<br><strong>بيانات:</strong> استيعاب، ثم تنظيف، ثم تحويل، ثم تقديم.</span>
     </div>
     <span class="icon">⚙️</span>
   </div>
@@ -479,7 +502,7 @@
     </div>
     <div class="example">
       <span class="lang-en"><strong>Example:</strong> A 50,000-token report → summarized into 500 words → passed to the next agent step cleanly.</span>
-      <span class="lang-ar"><strong>مثال:</strong> تقرير من 50,000 رمز ← يُلخَّص في 500 كلمة ← يُمرَّر للخطوة التالية بنظافة تامة.</span>
+      <span class="lang-ar"><strong>مثال:</strong> تقرير ضخم من 50,000 رمز يُلخَّص في 500 كلمة، ثم يُمرَّر للخطوة التالية بنظافة تامة.</span>
     </div>
     <span class="icon">🗜️</span>
   </div>
@@ -591,7 +614,7 @@
     </div>
     <div class="example">
       <span class="lang-en"><strong>Example:</strong> 1,000 visit your page → 30 buy = 3% CRO. You tweak the headline and button → 60 buy = 6% CRO. Same traffic, double the revenue.</span>
-      <span class="lang-ar"><strong>مثال:</strong> 1,000 يزورون صفحتك ← 30 يشترون = 3% CRO. تُعدّل العنوان والزر ← 60 يشترون = 6% CRO. نفس الزوار، ضعف الإيرادات.</span>
+      <span class="lang-ar"><strong>مثال:</strong> 1,000 زيارة، 30 شراء = نسبة تحويل 3٪. بعد تحسين الصفحة: 60 شراء = نسبة تحويل 6٪. نفس الزوار، ضعف الإيرادات.</span>
     </div>
     <span class="icon">🎯</span>
   </div>
